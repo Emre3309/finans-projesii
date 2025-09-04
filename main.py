@@ -142,7 +142,14 @@ class MainWindow(QMainWindow):
         self.table = QTableWidget(0, 6)
         self.table.setHorizontalHeaderLabels(["ID", "Tarih", "Dükkân", "Tür", "Tutar", "Not"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.setSelectionBehavior(self.table.SelectRows)
+        from PySide6.QtWidgets import QAbstractItemView
+
+        # Satır bazlı seçim
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        # Tek satır seçilebilsin
+        self.table.setSelectionMode(QAbstractItemView.SingleSelection)
+
         self.table.setEditTriggers(self.table.NoEditTriggers)
 
         # Özet

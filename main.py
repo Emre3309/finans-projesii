@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
 
             self.tabs.addTab(w, "Kayıt Ekle")
 
-        def save_transaction(self):
+    def save_transaction(self):
             date_iso = qdate_to_iso(self.date_input.date())
             shop = self.shop_input.text().strip()
             ttype = self.type_input.currentText()

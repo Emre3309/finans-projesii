@@ -150,7 +150,7 @@ class MainWindow(QMainWindow):
         # Tek satır seçilebilsin
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
 
-        self.table.setEditTriggers(self.table.NoEditTriggers)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         # Özet
         self.summary_label = QLabel("Toplamlar: Gelir 0 | Gider 0 | Kâr 0")

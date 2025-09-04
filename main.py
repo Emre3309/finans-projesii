@@ -37,7 +37,7 @@ class ChartCanvas(FigureCanvas):
         self.draw()
 
 class MainWindow(QMainWindow):
-     def __init__(self):
+    def __init__(self):
         super().__init__()
         self.setWindowTitle("Finans Takip (Kâr-Zarar)")
         self.resize(1100, 700)
@@ -51,43 +51,43 @@ class MainWindow(QMainWindow):
 
     # --------------- TAB 1: KAYIT EKLE ----------------
     def _init_tab_entry(self):
-            w = QWidget()
-            layout = QVBoxLayout(w)
+        w = QWidget()
+        layout = QVBoxLayout(w)
 
-            form = QFormLayout()
-            self.date_input = QDateEdit(calendarPopup=True)
-            self.date_input.setDate(QDate.currentDate())
+        form = QFormLayout()
+        self.date_input = QDateEdit(calendarPopup=True)
+        self.date_input.setDate(QDate.currentDate())
 
-            self.shop_input = QLineEdit()
-            self.type_input = QComboBox()
-            self.type_input.addItems(["gelir", "gider"])
-            self.amount_input = QDoubleSpinBox()
-            self.amount_input.setMaximum(1_000_000_000)
-            self.amount_input.setDecimals(2)
-            self.amount_input.setSingleStep(10.0)
-            self.note_input = QLineEdit()
+        self.shop_input = QLineEdit()
+        self.type_input = QComboBox()
+        self.type_input.addItems(["gelir", "gider"])
+        self.amount_input = QDoubleSpinBox()
+        self.amount_input.setMaximum(1_000_000_000)
+        self.amount_input.setDecimals(2)
+        self.amount_input.setSingleStep(10.0)
+        self.note_input = QLineEdit()
 
-            form.addRow("Tarih:", self.date_input)
-            form.addRow("Dükkân:", self.shop_input)
-            form.addRow("Tür:", self.type_input)
-            form.addRow("Tutar:", self.amount_input)
-            form.addRow("Not:", self.note_input)
+        form.addRow("Tarih:", self.date_input)
+        form.addRow("Dükkân:", self.shop_input)
+        form.addRow("Tür:", self.type_input)
+        form.addRow("Tutar:", self.amount_input)
+        form.addRow("Not:", self.note_input)
 
-            save_btn = QPushButton("Kaydet")
-            save_btn.clicked.connect(self.save_transaction)
+        save_btn = QPushButton("Kaydet")
+        save_btn.clicked.connect(self.save_transaction)
 
-            layout.addLayout(form)
-            layout.addWidget(save_btn, alignment=Qt.AlignLeft)
-            layout.addStretch(1)
+        layout.addLayout(form)
+        layout.addWidget(save_btn, alignment=Qt.AlignLeft)
+        layout.addStretch(1)
 
-            self.tabs.addTab(w, "Kayıt Ekle")
+        self.tabs.addTab(w, "Kayıt Ekle")
 
     def save_transaction(self):
-            date_iso = qdate_to_iso(self.date_input.date())
-            shop = self.shop_input.text().strip()
-            ttype = self.type_input.currentText()
-            amount = float(self.amount_input.value())
-            note = self.note_input.text().strip()
+        date_iso = qdate_to_iso(self.date_input.date())
+        shop = self.shop_input.text().strip()
+        ttype = self.type_input.currentText()
+        amount = float(self.amount_input.value())
+        note = self.note_input.text().strip()
     
             if not shop:
                 QMessageBox.warning(self, "Uyarı", "Dükkân ismi boş olamaz.")

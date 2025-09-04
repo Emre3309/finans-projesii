@@ -60,52 +60,72 @@ class MainWindow(QMainWindow):
         self.shop_input = QLineEdit()
         self.type_input = QComboBox()
         self.type_input.addItems(["gelir", "gider"])
+        self.category_input = QLineEdit()  # Kategori ekledik
         self.amount_input = QDoubleSpinBox()
         self.amount_input.setMaximum(1_000_000_000)
         self.amount_input.setDecimals(2)
         self.amount_input.setSingleStep(10.0)
         self.note_input = QLineEdit()
+
         form.addRow("Tarih:", self.date_input)
         form.addRow("Dükkân:", self.shop_input)
         form.addRow("Tür:", self.type_input)
+        form.addRow("Kategori:", self.category_input)  # Kategori satırı
         form.addRow("Tutar:", self.amount_input)
         form.addRow("Not:", self.note_input)
+
         save_btn = QPushButton("Kaydet")
         save_btn.clicked.connect(self.save_transaction)
+
         layout.addLayout(form)
         layout.addWidget(save_btn)
         w.setLayout(layout)
         self.tabs.addTab(w, "Kayıt Ekle")
 
+
     def save_transaction(self):
         date_iso = qdate_to_iso(self.date_input.date())
         shop = self.shop_input.text().strip()
         ttype = self.type_input.currentText()
+        category = self.category_input.text().strip()  # Kategori alıyoruz
         amount = float(self.amount_input.value())
         note = self.note_input.text().strip()
+
         if not shop:
             QMessageBox.warning(self, "Uyarı", "Dükkân ismi boş olamaz.")
             return
         if amount <= 0:
             QMessageBox.warning(self, "Uyarı", "Tutar 0'dan büyük olmalı.")
             return
+        if not category:
+            QMessageBox.warning(self, "Uyarı", "Kategori boş olamaz.")
+            return
+
         amount = -abs(amount) if ttype.lower() == "gider" else abs(amount)
-        db.add_transaction(date_iso, shop, ttype, amount, note)
+        db.add_transaction(date_iso, shop, ttype, category, amount, note)  # Kategoriyi db fonksiyonuna gönder
         QMessageBox.information(self, "Başarılı", "Kayıt eklendi.")
         self.shop_input.clear()
         self.amount_input.setValue(0)
         self.note_input.clear()
+        self.category_input.clear()  # Kategori alanını temizle
         self.refresh_table()
+
 
     # TAB 2
     def _init_tab_list(self):
         w = QWidget()
         layout = QVBoxLayout(w)
-        self.table = QTableWidget(0, 6)
-        self.table.setHorizontalHeaderLabels(["ID", "Tarih", "Dükkân", "Tür", "Tutar", "Not"])
+        self.table = QTableWidget(0, 7)  # Artık 7 sütun
+        self.table.setHorizontalHeaderLabels(["ID", "Tarih", "Dükkân", "Tür", "Kategori", "Tutar", "Not"])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        
         layout.addWidget(self.table)
         w.setLayout(layout)
         self.tabs.addTab(w, "Kayıtlar")
+
 
     def refresh_table(self):
         self.table.setRowCount(0)
@@ -124,6 +144,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.chart)
         w.setLayout(layout)
         self.tabs.addTab(w, "Raporlar")
+
+
 
     def draw_chart(self):
         rows = db.group_by("ay", "2020-01-01", "2030-01-01")

@@ -113,44 +113,44 @@ class MainWindow(QMainWindow):
 
     # --------------- TAB 2: KAYITLAR ----------------
         def _init_tab_list(self):
-        w = QWidget()
-        outer = QVBoxLayout(w)
+            w = QWidget()
+            outer = QVBoxLayout(w)
 
         # Filtre kutusu
-        filter_box = QGroupBox("Filtre")
-        grid = QGridLayout(filter_box)
+            filter_box = QGroupBox("Filtre")
+            grid = QGridLayout(filter_box)
 
-        self.start_date = QDateEdit(calendarPopup=True)
-        self.end_date = QDateEdit(calendarPopup=True)
-        self.start_date.setDate(QDate.currentDate().addMonths(-1))
-        self.end_date.setDate(QDate.currentDate())
+            self.start_date = QDateEdit(calendarPopup=True)
+            self.end_date = QDateEdit(calendarPopup=True)
+            self.start_date.setDate(QDate.currentDate().addMonths(-1))
+            self.end_date.setDate(QDate.currentDate())
 
-        self.filter_type = QComboBox()
-        self.filter_type.addItems(["hepsi", "gelir", "gider"])
+            self.filter_type = QComboBox()
+            self.filter_type.addItems(["hepsi", "gelir", "gider"])
 
-        apply_btn = QPushButton("Uygula")
-        apply_btn.clicked.connect(self.refresh_table)
+            apply_btn = QPushButton("Uygula")
+            apply_btn.clicked.connect(self.refresh_table)
 
-        export_btn = QPushButton("CSV'ye Aktar")
-        export_btn.clicked.connect(self.export_csv)
+            export_btn = QPushButton("CSV'ye Aktar")
+            export_btn.clicked.connect(self.export_csv)
 
-        delete_btn = QPushButton("Seçili Kaydı Sil")
-        delete_btn.clicked.connect(self.delete_selected)
+            delete_btn = QPushButton("Seçili Kaydı Sil")
+            delete_btn.clicked.connect(self.delete_selected)
 
-        grid.addWidget(QLabel("Başlangıç:"), 0, 0)
-        grid.addWidget(self.start_date, 0, 1)
-        grid.addWidget(QLabel("Bitiş:"), 0, 2)
-        grid.addWidget(self.end_date, 0, 3)
-        grid.addWidget(QLabel("Tür:"), 0, 4)
-        grid.addWidget(self.filter_type, 0, 5)
-        grid.addWidget(apply_btn, 0, 6)
-        grid.addWidget(export_btn, 0, 7)
-        grid.addWidget(delete_btn, 0, 8)
+            grid.addWidget(QLabel("Başlangıç:"), 0, 0)
+            grid.addWidget(self.start_date, 0, 1)
+            grid.addWidget(QLabel("Bitiş:"), 0, 2)
+            grid.addWidget(self.end_date, 0, 3)
+            grid.addWidget(QLabel("Tür:"), 0, 4)
+            grid.addWidget(self.filter_type, 0, 5)
+            grid.addWidget(apply_btn, 0, 6)
+            grid.addWidget(export_btn, 0, 7)
+            grid.addWidget(delete_btn, 0, 8)
 
         # Tablo
-        self.table = QTableWidget(0, 6)
-        self.table.setHorizontalHeaderLabels(["ID", "Tarih", "Dükkân", "Tür", "Tutar", "Not"])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            self.table = QTableWidget(0, 6)
+            self.table.setHorizontalHeaderLabels(["ID", "Tarih", "Dükkân", "Tür", "Tutar", "Not"])
+            self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         from PySide6.QtWidgets import QAbstractItemView
 
         # Satır bazlı seçim
@@ -173,65 +173,65 @@ class MainWindow(QMainWindow):
         self.refresh_summary()
 
         def current_filters(self):
-        start = qdate_to_iso(self.start_date.date())
-        end = qdate_to_iso(self.end_date.date())
-        t = self.filter_type.currentText()
-        t = None if t == "hepsi" else t
-        return start, end, t
+            start = qdate_to_iso(self.start_date.date())
+            end = qdate_to_iso(self.end_date.date())
+            t = self.filter_type.currentText()
+            t = None if t == "hepsi" else t
+            return start, end, t
 
         def refresh_table(self):
-        start, end, t = self.current_filters()
-        rows = db.fetch_transactions(start, end, t)
-        self.table.setRowCount(0)
-        for r in rows:
-            row = self.table.rowCount()
-            self.table.insertRow(row)
-            for col, val in enumerate(r):
-                if col == 4:  # Tutar sütunu
-                    tutar = float(val)
-                    tip = "Gider" if tutar < 0 else "Gelir"
-                    display_val = f"{abs(tutar):.2f} ({tip})"
-                    item = QTableWidgetItem(display_val)
-                    item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-                else:
-                    item = QTableWidgetItem(str(val))
-                if col == 0:  # ID sağa hizalı
-                    item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-                    self.table.setItem(row, col, item)
+            start, end, t = self.current_filters()
+            rows = db.fetch_transactions(start, end, t)
+            self.table.setRowCount(0)
+            for r in rows:
+                row = self.table.rowCount()
+                self.table.insertRow(row)
+                for col, val in enumerate(r):
+                    if col == 4:  # Tutar sütunu
+                        tutar = float(val)
+                        tip = "Gider" if tutar < 0 else "Gelir"
+                        display_val = f"{abs(tutar):.2f} ({tip})"
+                        item = QTableWidgetItem(display_val)
+                        item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                    else:
+                        item = QTableWidgetItem(str(val))
+                    if col == 0:  # ID sağa hizalı
+                        item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                        self.table.setItem(row, col, item)
 
 
         def refresh_summary(self):
-        start, end, t = self.current_filters()
-        s = db.summarize(start, end)
-        self.summary_label.setText(f"Toplamlar: Gelir {s['gelir']:.2f} | Gider {s['gider']:.2f} | Kâr {s['kar']:.2f}")
+            start, end, t = self.current_filters()
+            s = db.summarize(start, end)
+            self.summary_label.setText(f"Toplamlar: Gelir {s['gelir']:.2f} | Gider {s['gider']:.2f} | Kâr {s['kar']:.2f}")
 
         def export_csv(self):
-        path, _ = QFileDialog.getSaveFileName(self, "CSV'ye aktar", "kayitlar.csv", "CSV (*.csv)")
+            path, _ = QFileDialog.getSaveFileName(self, "CSV'ye aktar", "kayitlar.csv", "CSV (*.csv)")
         if not path:
             return
-        start, end, t = self.current_filters()
-        rows = db.fetch_transactions(start, end, t)
-        with open(path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(["ID", "Tarih", "Dükkân", "Tür", "Tutar", "Not"])
+            start, end, t = self.current_filters()
+            rows = db.fetch_transactions(start, end, t)
+            with open(path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["ID", "Tarih", "Dükkân", "Tür", "Tutar", "Not"])
             for r in rows:
                 writer.writerow(r)
-        QMessageBox.information(self, "Bilgi", "CSV çıktısı oluşturuldu.")
+                QMessageBox.information(self, "Bilgi", "CSV çıktısı oluşturuldu.")
 
         def delete_selected(self):
-        row = self.table.currentRow()
-        if row < 0:
-            QMessageBox.warning(self, "Uyarı", "Silmek için bir satır seçin.")
+            row = self.table.currentRow()
+            if row < 0:
+                QMessageBox.warning(self, "Uyarı", "Silmek için bir satır seçin.")
+                return
+            tx_id_item = self.table.item(row, 0)
+            if not tx_id_item:
             return
-        tx_id_item = self.table.item(row, 0)
-        if not tx_id_item:
-            return
-        tx_id = int(tx_id_item.text())
-        ok = QMessageBox.question(self, "Onay", f"ID {tx_id} kaydını silmek istiyor musunuz?")
-        if ok == QMessageBox.StandardButton.Yes:
-            db.delete_transaction(tx_id)
-            self.refresh_table()
-            self.refresh_summary()
+            tx_id = int(tx_id_item.text())
+            ok = QMessageBox.question(self, "Onay", f"ID {tx_id} kaydını silmek istiyor musunuz?")
+            if ok == QMessageBox.StandardButton.Yes:
+                db.delete_transaction(tx_id)
+                self.refresh_table()
+                self.refresh_summary()
 
     # --------------- TAB 3: RAPORLAR ----------------
     def _init_tab_reports(self):

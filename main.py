@@ -2,7 +2,8 @@ import csv
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QTabWidget, QFormLayout, QVBoxLayout, QHBoxLayout,
     QLineEdit, QDateEdit, QDoubleSpinBox, QComboBox, QPushButton, QLabel, QTableWidget,
-    QTableWidgetItem, QFileDialog, QMessageBox, QHeaderView, QGroupBox, QGridLayout
+    QTableWidgetItem, QFileDialog, QMessageBox, QHeaderView, QGroupBox, QGridLayout,
+    QAbstractItemView
 )
 from PySide6.QtCore import Qt, QDate
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -24,10 +25,11 @@ class ChartCanvas(FigureCanvas):
         gelir = [r[1] for r in rows]
         gider = [r[2] for r in rows]
         kar = [r[3] for r in rows]
-        # Basit üç çizgi
+       
         self.ax.plot(labels, gelir, marker="o", label="Gelir")
         self.ax.plot(labels, gider, marker="o", label="Gider")
         self.ax.plot(labels, kar,   marker="o", label="Kâr")
+       
         self.ax.set_title(title)
         self.ax.set_xlabel("Dönem")
         self.ax.set_ylabel("Tutar")
@@ -49,7 +51,7 @@ class MainWindow(QMainWindow):
         self._init_tab_list()
         self._init_tab_reports()
 
-    # ----------------- TAB 1: KAYIT EKLE -----------------
+    # --------------- TAB 1: KAYIT EKLE ----------------
     def _init_tab_entry(self):
         w = QWidget()
         layout = QVBoxLayout(w)
@@ -57,7 +59,6 @@ class MainWindow(QMainWindow):
         form = QFormLayout()
         self.date_input = QDateEdit(calendarPopup=True)
         self.date_input.setDate(QDate.currentDate())
-
         self.shop_input = QLineEdit()
         self.type_input = QComboBox()
         self.type_input.addItems(["gelir", "gider"])
@@ -109,7 +110,7 @@ class MainWindow(QMainWindow):
         self.refresh_table()
         self.refresh_summary()
 
-    # ----------------- TAB 2: KAYITLAR -----------------
+    # --------------- TAB 2: KAYITLAR ----------------
     def _init_tab_list(self):
         w = QWidget()
         outer = QVBoxLayout(w)
@@ -127,8 +128,10 @@ class MainWindow(QMainWindow):
 
         apply_btn = QPushButton("Uygula")
         apply_btn.clicked.connect(self.refresh_table)
+
         export_btn = QPushButton("CSV'ye Aktar")
         export_btn.clicked.connect(self.export_csv)
+
         delete_btn = QPushButton("Seçili Kaydı Sil")
         delete_btn.clicked.connect(self.delete_selected)
 
@@ -145,7 +148,6 @@ class MainWindow(QMainWindow):
         self.table = QTableWidget(0, 6)
         self.table.setHorizontalHeaderLabels(["ID", "Tarih", "Dükkân", "Tür", "Tutar", "Not"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        from PySide6.QtWidgets import QAbstractItemView
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -175,15 +177,17 @@ class MainWindow(QMainWindow):
             row = self.table.rowCount()
             self.table.insertRow(row)
             for col, val in enumerate(r):
-                if col == 4:
+                if col == 4:  # Tutar sütunu
                     tutar = float(val)
                     tip = "Gider" if tutar < 0 else "Gelir"
-                    display_val = f"{abs(tutar):.2f} ({tip})"
+                    display_val = f"{abs(tutar):.2f}"
                     item = QTableWidgetItem(display_val)
                     item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 else:
                     item = QTableWidgetItem(str(val))
-                if col == 0:
+               
+                # Bu kısım düzeltildi. Her sütun için item atanır.
+                if col == 0:  # ID sağa hizalı
                     item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 self.table.setItem(row, col, item)
 
@@ -196,13 +200,16 @@ class MainWindow(QMainWindow):
         path, _ = QFileDialog.getSaveFileName(self, "CSV'ye aktar", "kayitlar.csv", "CSV (*.csv)")
         if not path:
             return
+       
         start, end, t = self.current_filters()
         rows = db.fetch_transactions(start, end, t)
+       
         with open(path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["ID", "Tarih", "Dükkân", "Tür", "Tutar", "Not"])
             for r in rows:
                 writer.writerow(r)
+           
         QMessageBox.information(self, "Bilgi", "CSV çıktısı oluşturuldu.")
 
     def delete_selected(self):
@@ -210,13 +217,65 @@ class MainWindow(QMainWindow):
         if row < 0:
             QMessageBox.warning(self, "Uyarı", "Silmek için bir satır seçin.")
             return
+           
         tx_id_item = self.table.item(row, 0)
         if not tx_id_item:
             return
+           
         tx_id = int(tx_id_item.text())
         ok = QMessageBox.question(self, "Onay", f"ID {tx_id} kaydını silmek istiyor musunuz?")
+       
         if ok == QMessageBox.StandardButton.Yes:
+            db.delete_transaction(tx_id)
+            self.refresh_table()
+            self.refresh_summary()
 
+    # --------------- TAB 3: RAPORLAR ----------------
+    def _init_tab_reports(self):
+        w = QWidget()
+        layout = QVBoxLayout(w)
+
+        ctrl_box = QGroupBox("Rapor Ayarları")
+        grid = QGridLayout(ctrl_box)
+
+        self.rep_start = QDateEdit(calendarPopup=True)
+        self.rep_end = QDateEdit(calendarPopup=True)
+        self.rep_start.setDate(QDate.currentDate().addMonths(-6))
+        self.rep_end.setDate(QDate.currentDate())
+
+        self.period_combo = QComboBox()
+        self.period_combo.addItems(["ay", "hafta"])
+
+        draw_btn = QPushButton("Grafik Oluştur")
+        draw_btn.clicked.connect(self.draw_chart)
+
+        grid.addWidget(QLabel("Başlangıç:"), 0, 0)
+        grid.addWidget(self.rep_start, 0, 1)
+        grid.addWidget(QLabel("Bitiş:"), 0, 2)
+        grid.addWidget(self.rep_end, 0, 3)
+        grid.addWidget(QLabel("Dönem:"), 0, 4)
+        grid.addWidget(self.period_combo, 0, 5)
+        grid.addWidget(draw_btn, 0, 6)
+
+        self.chart = ChartCanvas()
+
+        layout.addWidget(ctrl_box)
+        layout.addWidget(self.chart)
+
+        self.tabs.addTab(w, "Raporlar")
+
+    def draw_chart(self):
+        start = qdate_to_iso(self.rep_start.date())
+        end = qdate_to_iso(self.rep_end.date())
+        period = self.period_combo.currentText()
+        rows = db.group_by(period, start, end)
+       
+        if not rows:
+            QMessageBox.information(self, "Bilgi", "Bu aralıkta veri yok.")
+            return
+           
+        title = f"{period.title()} Bazında Gelir-Gider-Kâr"
+        self.chart.plot_grouped(rows, title)
 
 def main():
     app = QApplication([])

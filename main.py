@@ -37,7 +37,7 @@ class ChartCanvas(FigureCanvas):
         self.draw()
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+     def __init__(self):
         super().__init__()
         self.setWindowTitle("Finans Takip (Kâr-Zarar)")
         self.resize(1100, 700)
@@ -50,7 +50,7 @@ class MainWindow(QMainWindow):
         self._init_tab_reports()
 
     # --------------- TAB 1: KAYIT EKLE ----------------
-    def _init_tab_entry(self):
+        def _init_tab_entry(self):
         w = QWidget()
         layout = QVBoxLayout(w)
 
@@ -82,37 +82,37 @@ class MainWindow(QMainWindow):
 
         self.tabs.addTab(w, "Kayıt Ekle")
 
-def save_transaction(self):
-    date_iso = qdate_to_iso(self.date_input.date())
-    shop = self.shop_input.text().strip()
-    ttype = self.type_input.currentText()
-    amount = float(self.amount_input.value())
-    note = self.note_input.text().strip()
-
-    if not shop:
+        def save_transaction(self):
+        date_iso = qdate_to_iso(self.date_input.date())
+        shop = self.shop_input.text().strip()
+        ttype = self.type_input.currentText()
+        amount = float(self.amount_input.value())
+        note = self.note_input.text().strip()
+    
+        if not shop:
         QMessageBox.warning(self, "Uyarı", "Dükkân ismi boş olamaz.")
-        return
-    if amount <= 0:
+            return
+        if amount <= 0:
         QMessageBox.warning(self, "Uyarı", "Tutar 0'dan büyük olmalı.")
         return
 
-    # Kategoriye göre tutarı negatif yap
-    if ttype.lower() == "gider":
+        # Kategoriye göre tutarı negatif yap
+        if ttype.lower() == "gider":
         amount = -abs(amount)
-    else:
+        else:
         amount = abs(amount)
 
-    db.add_transaction(date_iso, shop, ttype, amount, note)
-    QMessageBox.information(self, "Başarılı", "Kayıt eklendi.")
-    self.shop_input.clear()
-    self.amount_input.setValue(0.0)
-    self.note_input.clear()
-    self.refresh_table()
-    self.refresh_summary()
+        db.add_transaction(date_iso, shop, ttype, amount, note)
+        QMessageBox.information(self, "Başarılı", "Kayıt eklendi.")
+        self.shop_input.clear()
+        self.amount_input.setValue(0.0)
+        self.note_input.clear()
+        self.refresh_table()
+        self.refresh_summary()
 
 
     # --------------- TAB 2: KAYITLAR ----------------
-    def _init_tab_list(self):
+        def _init_tab_list(self):
         w = QWidget()
         outer = QVBoxLayout(w)
 
@@ -172,14 +172,14 @@ def save_transaction(self):
         self.refresh_table()
         self.refresh_summary()
 
-    def current_filters(self):
+        def current_filters(self):
         start = qdate_to_iso(self.start_date.date())
         end = qdate_to_iso(self.end_date.date())
         t = self.filter_type.currentText()
         t = None if t == "hepsi" else t
         return start, end, t
 
-    def refresh_table(self):
+        def refresh_table(self):
         start, end, t = self.current_filters()
         rows = db.fetch_transactions(start, end, t)
         self.table.setRowCount(0)
@@ -200,12 +200,12 @@ def save_transaction(self):
                     self.table.setItem(row, col, item)
 
 
-    def refresh_summary(self):
+        def refresh_summary(self):
         start, end, t = self.current_filters()
         s = db.summarize(start, end)
         self.summary_label.setText(f"Toplamlar: Gelir {s['gelir']:.2f} | Gider {s['gider']:.2f} | Kâr {s['kar']:.2f}")
 
-    def export_csv(self):
+        def export_csv(self):
         path, _ = QFileDialog.getSaveFileName(self, "CSV'ye aktar", "kayitlar.csv", "CSV (*.csv)")
         if not path:
             return
@@ -218,7 +218,7 @@ def save_transaction(self):
                 writer.writerow(r)
         QMessageBox.information(self, "Bilgi", "CSV çıktısı oluşturuldu.")
 
-    def delete_selected(self):
+        def delete_selected(self):
         row = self.table.currentRow()
         if row < 0:
             QMessageBox.warning(self, "Uyarı", "Silmek için bir satır seçin.")

@@ -98,17 +98,17 @@ class MainWindow(QMainWindow):
 
         # Kategoriye göre tutarı negatif yap
         if ttype.lower() == "gider":
-        amount = -abs(amount)
+            amount = -abs(amount)
         else:
-        amount = abs(amount)
+            amount = abs(amount)
 
-        db.add_transaction(date_iso, shop, ttype, amount, note)
-        QMessageBox.information(self, "Başarılı", "Kayıt eklendi.")
-        self.shop_input.clear()
-        self.amount_input.setValue(0.0)
-        self.note_input.clear()
-        self.refresh_table()
-        self.refresh_summary()
+            db.add_transaction(date_iso, shop, ttype, amount, note)
+            QMessageBox.information(self, "Başarılı", "Kayıt eklendi.")
+            self.shop_input.clear()
+            self.amount_input.setValue(0.0)
+            self.note_input.clear()
+            self.refresh_table()
+            self.refresh_summary()
 
 
     # --------------- TAB 2: KAYITLAR ----------------

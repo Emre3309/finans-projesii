@@ -187,11 +187,18 @@ def save_transaction(self):
             row = self.table.rowCount()
             self.table.insertRow(row)
             for col, val in enumerate(r):
-                item = QTableWidgetItem(str(val))
-                if col in (0, 4):  # ID ve Tutar sağa hizalı
+                if col == 4:  # Tutar sütunu
+                    tutar = float(val)
+                    tip = "Gider" if tutar < 0 else "Gelir"
+                    display_val = f"{abs(tutar):.2f} ({tip})"
+                    item = QTableWidgetItem(display_val)
                     item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-                self.table.setItem(row, col, item)
-        self.refresh_summary()
+                else:
+                    item = QTableWidgetItem(str(val))
+                if col == 0:  # ID sağa hizalı
+                    item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                    self.table.setItem(row, col, item)
+
 
     def refresh_summary(self):
         start, end, t = self.current_filters()

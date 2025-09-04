@@ -235,38 +235,38 @@ class MainWindow(QMainWindow):
 
     # --------------- TAB 3: RAPORLAR ----------------
     def _init_tab_reports(self):
-    w = QWidget()
-    layout = QVBoxLayout(w)
+        w = QWidget()
+        layout = QVBoxLayout(w)
 
         # Kontroller
-    ctrl_box = QGroupBox("Rapor Ayarları")
-    grid = QGridLayout(ctrl_box)
+        ctrl_box = QGroupBox("Rapor Ayarları")
+        grid = QGridLayout(ctrl_box)
 
-    self.rep_start = QDateEdit(calendarPopup=True)
-    self.rep_end = QDateEdit(calendarPopup=True)
-    self.rep_start.setDate(QDate.currentDate().addMonths(-6))
-    self.rep_end.setDate(QDate.currentDate())
+        self.rep_start = QDateEdit(calendarPopup=True)
+        self.rep_end = QDateEdit(calendarPopup=True)
+        self.rep_start.setDate(QDate.currentDate().addMonths(-6))
+        self.rep_end.setDate(QDate.currentDate())
 
-    self.period_combo = QComboBox()
-    self.period_combo.addItems(["ay", "hafta"])
+        self.period_combo = QComboBox()
+        self.period_combo.addItems(["ay", "hafta"])
 
-    draw_btn = QPushButton("Grafik Oluştur")
-    draw_btn.clicked.connect(self.draw_chart)
+        draw_btn = QPushButton("Grafik Oluştur")
+        draw_btn.clicked.connect(self.draw_chart)
 
-    grid.addWidget(QLabel("Başlangıç:"), 0, 0)
-    grid.addWidget(self.rep_start, 0, 1)
-    grid.addWidget(QLabel("Bitiş:"), 0, 2)
-    grid.addWidget(self.rep_end, 0, 3)
-    grid.addWidget(QLabel("Dönem:"), 0, 4)
-    grid.addWidget(self.period_combo, 0, 5)
-    grid.addWidget(draw_btn, 0, 6)
+        grid.addWidget(QLabel("Başlangıç:"), 0, 0)
+        grid.addWidget(self.rep_start, 0, 1)
+        grid.addWidget(QLabel("Bitiş:"), 0, 2)
+        grid.addWidget(self.rep_end, 0, 3)
+        grid.addWidget(QLabel("Dönem:"), 0, 4)
+        grid.addWidget(self.period_combo, 0, 5)
+        grid.addWidget(draw_btn, 0, 6)
 
-    self.chart = ChartCanvas()
+        self.chart = ChartCanvas()
 
-    layout.addWidget(ctrl_box)
-    layout.addWidget(self.chart)
+        layout.addWidget(ctrl_box)
+        layout.addWidget(self.chart)
 
-    self.tabs.addTab(w, "Raporlar")
+        self.tabs.addTab(w, "Raporlar")
 
     def draw_chart(self):
         start = qdate_to_iso(self.rep_start.date())

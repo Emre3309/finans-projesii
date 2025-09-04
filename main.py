@@ -225,7 +225,7 @@ class MainWindow(QMainWindow):
                 return
             tx_id_item = self.table.item(row, 0)
             if not tx_id_item:
-            return
+                return
             tx_id = int(tx_id_item.text())
             ok = QMessageBox.question(self, "Onay", f"ID {tx_id} kaydını silmek istiyor musunuz?")
             if ok == QMessageBox.StandardButton.Yes:

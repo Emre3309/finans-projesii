@@ -82,25 +82,34 @@ class MainWindow(QMainWindow):
 
         self.tabs.addTab(w, "Kayıt Ekle")
 
-    def save_transaction(self):
-        date_iso = qdate_to_iso(self.date_input.date())
-        shop = self.shop_input.text().strip()
-        ttype = self.type_input.currentText()
-        amount = float(self.amount_input.value())
-        note = self.note_input.text().strip()
-        if not shop:
-            QMessageBox.warning(self, "Uyarı", "Dükkân ismi boş olamaz.")
-            return
-        if amount <= 0:
-            QMessageBox.warning(self, "Uyarı", "Tutar 0'dan büyük olmalı.")
-            return
-        db.add_transaction(date_iso, shop, ttype, amount, note)
-        QMessageBox.information(self, "Başarılı", "Kayıt eklendi.")
-        self.shop_input.clear()
-        self.amount_input.setValue(0.0)
-        self.note_input.clear()
-        self.refresh_table()
-        self.refresh_summary()
+def save_transaction(self):
+    date_iso = qdate_to_iso(self.date_input.date())
+    shop = self.shop_input.text().strip()
+    ttype = self.type_input.currentText()
+    amount = float(self.amount_input.value())
+    note = self.note_input.text().strip()
+
+    if not shop:
+        QMessageBox.warning(self, "Uyarı", "Dükkân ismi boş olamaz.")
+        return
+    if amount <= 0:
+        QMessageBox.warning(self, "Uyarı", "Tutar 0'dan büyük olmalı.")
+        return
+
+    # Kategoriye göre tutarı negatif yap
+    if ttype.lower() == "gider":
+        amount = -abs(amount)
+    else:
+        amount = abs(amount)
+
+    db.add_transaction(date_iso, shop, ttype, amount, note)
+    QMessageBox.information(self, "Başarılı", "Kayıt eklendi.")
+    self.shop_input.clear()
+    self.amount_input.setValue(0.0)
+    self.note_input.clear()
+    self.refresh_table()
+    self.refresh_summary()
+
 
     # --------------- TAB 2: KAYITLAR ----------------
     def _init_tab_list(self):

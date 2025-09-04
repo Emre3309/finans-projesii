@@ -50,8 +50,7 @@ class MainWindow(QMainWindow):
         self._init_tab_entry()
         self._init_tab_list()
         self._init_tab_reports()
-
-    # TAB 1
+        
     def _init_tab_entry(self):
         w = QWidget()
         layout = QVBoxLayout(w)
